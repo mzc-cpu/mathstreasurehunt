@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>IB Maths Treasure Hunt</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Mono:wght@400;500&family=EB+Garamond:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a1a1a;
+    --soft: #f7f4ef;
+    --border: #d4c9b8;
+    --amber: #e8a020; --amber-l: #fff8e7; --amber-m: #fde68a; --amber-t: #7a4800;
+    --blue:  #2563b0; --blue-l:  #eff6ff; --blue-m:  #bfdbfe; --blue-t:  #0f2d6e;
+    --crim:  #c0392b; --crim-l:  #fff1f0; --crim-m:  #fecaca; --crim-t:  #7a1010;
+    --emer:  #1a7a4a; --emer-l:  #f0fdf4; --emer-m:  #bbf7d0; --emer-t:  #0d4a28;
+    --team-color: #1a1a1a;
+    --team-light: #f7f4ef;
+    --team-mid:   #e0dcd5;
+    --team-dark:  #1a1a1a;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    font-family: 'EB Garamond', Georgia, serif;
+    background: var(--soft);
+    color: var(--ink);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0;
+  }
+
+  /* ── APP SHELL ── */
+  #app {
+    width: 100%;
+    max-width: 480px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: white;
+    box-shadow: 0 0 40px rgba(0,0,0,0.08);
+  }
+
+  /* ── TOP BAR ── */
+  .top-bar {
+    padding: 14px 20px 12px;
+    background: var(--ink);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+  .top-bar .title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.05rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+  }
+  .top-bar .subtitle {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    opacity: 0.6;
+    letter-spacing: 0.06em;
+    margin-top: 1px;
+  }
+  .top-bar .egg { font-size: 1.4rem; }
+
+  /* ── SCREENS ── */
+  .screen { flex: 1; display: flex; flex-direction: column; padding: 24px 20px 32px; }
+  .screen.hidden { display: none; }
+
+  /* ── TEAM SELECT ── */
+  .team-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-top: 12px;
+  }
+  .team-btn {
+    border: 2.5px solid;
+    border-radius: 8px;
+    padding: 22px 12px;
+    background: none;
+    cursor: pointer;
+    font-family: 'Playfair Display', serif;
+    font-size: 2.2rem;
+    font-weight: 900;
+    line-height: 1;
+    text-align: center;
+    transition: transform 0.12s, box-shadow 0.12s;
+    position: relative;
+  }
+  .team-btn:active { transform: scale(0.96); }
+  .team-btn .team-label {
+    display: block;
+    font-size: 0.7rem;
+    font-family: 'DM Mono', monospace;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-top: 6px;
+    opacity: 0.7;
+  }
+  .team-btn.pi-btn    { border-color: var(--amber); background: var(--amber-l); color: var(--amber-t); }
+  .team-btn.tau-btn   { border-color: var(--blue);  background: var(--blue-l);  color: var(--blue-t); }
+  .team-btn.e-btn     { border-color: var(--crim);  background: var(--crim-l);  color: var(--crim-t); }
+  .team-btn.i-btn     { border-color: var(--emer);  background: var(--emer-l);  color: var(--emer-t); }
+
+  .welcome-head {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.9rem;
+    font-weight: 900;
+    line-height: 1.1;
+    margin-bottom: 6px;
+  }
+  .welcome-sub {
+    font-style: italic;
+    color: #666;
+    font-size: 0.95rem;
+    margin-bottom: 6px;
+  }
+  .welcome-instructions {
+    font-size: 0.88rem;
+    color: #555;
+    line-height: 1.6;
+    border-left: 3px solid var(--border);
+    padding-left: 12px;
+    margin: 14px 0 20px;
+  }
+
+  /* ── HUNT SCREEN ── */
+  .team-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px 4px 8px;
+    border-radius: 999px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    border: 1.5px solid;
+    margin-bottom: 18px;
+  }
+  .team-chip .chip-symbol {
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem;
+    font-weight: 700;
+  }
+
+  .stop-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #999;
+    margin-bottom: 4px;
+  }
+  .location-display {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 4px;
+  }
+  .location-icon { font-size: 1.8rem; }
+  .location-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.6rem;
+    font-weight: 900;
+    line-height: 1.1;
+  }
+
+  .divider { height: 2px; background: var(--ink); margin: 16px 0; }
+
+  .q-prompt-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #aaa;
+    margin-bottom: 6px;
+  }
+  .q-prompt {
+    font-size: 1.05rem;
+    line-height: 1.55;
+    margin-bottom: 6px;
+    font-weight: 600;
+  }
+  .q-hint {
+    font-size: 0.82rem;
+    font-style: italic;
+    color: #888;
+    margin-bottom: 18px;
+  }
+
+  .answer-input {
+    width: 100%;
+    font-family: 'DM Mono', monospace;
+    font-size: 1.1rem;
+    padding: 14px 16px;
+    border: 2px solid var(--border);
+    border-radius: 6px;
+    outline: none;
+    background: var(--soft);
+    color: var(--ink);
+    transition: border-color 0.15s;
+    -webkit-appearance: none;
+  }
+  .answer-input:focus { border-color: var(--ink); background: white; }
+  .answer-input.shake {
+    animation: shake 0.4s ease;
+    border-color: var(--crim);
+    background: var(--crim-l);
+  }
+  .answer-input.correct-glow {
+    border-color: var(--emer);
+    background: var(--emer-l);
+  }
+
+  @keyframes shake {
+    0%,100%{transform:translateX(0)}
+    20%{transform:translateX(-8px)}
+    40%{transform:translateX(8px)}
+    60%{transform:translateX(-6px)}
+    80%{transform:translateX(6px)}
+  }
+
+  .submit-btn {
+    width: 100%;
+    margin-top: 12px;
+    padding: 16px;
+    border: none;
+    border-radius: 6px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.88rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    background: var(--ink);
+    color: white;
+    transition: background 0.15s, transform 0.1s;
+  }
+  .submit-btn:active { transform: scale(0.98); }
+  .submit-btn:hover { background: #333; }
+
+  .error-msg {
+    color: var(--crim);
+    font-size: 0.88rem;
+    font-style: italic;
+    margin-top: 8px;
+    min-height: 1.3rem;
+    text-align: center;
+  }
+
+  /* ── PROGRESS BAR ── */
+  .progress-area { margin-top: auto; padding-top: 24px; }
+  .progress-label {
+    display: flex;
+    justify-content: space-between;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.06em;
+    color: #aaa;
+    margin-bottom: 6px;
+  }
+  .progress-track {
+    height: 5px;
+    background: var(--border);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    border-radius: 99px;
+    background: var(--ink);
+    transition: width 0.4s ease;
+  }
+
+  /* ── REVEAL SCREEN ── */
+  .reveal-screen { text-align: center; justify-content: center; align-items: center; gap: 0; }
+  .tick-circle {
+    width: 72px; height: 72px;
+    border-radius: 50%;
+    background: var(--emer);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 2rem;
+    margin: 0 auto 16px;
+    animation: popIn 0.3s cubic-bezier(0.175,0.885,0.32,1.275);
+  }
+  @keyframes popIn {
+    0%{transform:scale(0);opacity:0}
+    100%{transform:scale(1);opacity:1}
+  }
+  .correct-word {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    font-weight: 900;
+    color: var(--emer);
+    margin-bottom: 24px;
+    letter-spacing: 0.04em;
+  }
+  .next-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #aaa;
+    margin-bottom: 10px;
+  }
+  .next-loc-card {
+    border: 3px solid var(--ink);
+    border-radius: 10px;
+    padding: 22px 28px;
+    margin-bottom: 28px;
+    animation: slideUp 0.35s ease 0.15s both;
+    width: 100%;
+  }
+  @keyframes slideUp {
+    0%{transform:translateY(20px);opacity:0}
+    100%{transform:translateY(0);opacity:1}
+  }
+  .next-loc-icon { font-size: 2.8rem; margin-bottom: 6px; }
+  .next-loc-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.9rem;
+    font-weight: 900;
+    line-height: 1.1;
+  }
+  .next-stop-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    color: #888;
+    margin-top: 4px;
+    letter-spacing: 0.06em;
+  }
+  .goto-btn {
+    width: 100%;
+    padding: 16px;
+    border: none;
+    border-radius: 6px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.85rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: opacity 0.15s, transform 0.1s;
+    background: var(--ink);
+    color: white;
+  }
+  .goto-btn:active { transform: scale(0.98); }
+
+  /* ── FINAL SCREEN ── */
+  .final-screen { justify-content: center; align-items: center; text-align: center; }
+  .trophy { font-size: 4rem; margin-bottom: 16px; animation: bounce 0.6s ease; }
+  @keyframes bounce {
+    0%{transform:scale(0) rotate(-10deg)}
+    60%{transform:scale(1.15) rotate(3deg)}
+    100%{transform:scale(1) rotate(0)}
+  }
+  .final-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    font-weight: 900;
+    margin-bottom: 8px;
+  }
+  .final-sub {
+    font-style: italic;
+    color: #666;
+    margin-bottom: 24px;
+    font-size: 0.95rem;
+  }
+  .prize-box {
+    border: 3px solid var(--amber);
+    background: var(--amber-l);
+    color: var(--amber-t);
+    border-radius: 10px;
+    padding: 20px 24px;
+    margin-bottom: 20px;
+    width: 100%;
+  }
+  .prize-box .prize-icon { font-size: 2.5rem; margin-bottom: 6px; }
+  .prize-box .prize-text {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.2rem;
+    font-weight: 700;
+    line-height: 1.3;
+  }
+
+  /* ── RESET / FOOTER ── */
+  .footer-link {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    color: #ccc;
+    text-align: center;
+    margin-top: 28px;
+    cursor: pointer;
+    letter-spacing: 0.06em;
+  }
+  .footer-link:hover { color: #999; }
+
+  /* ── TEACHER RESET MODAL ── */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.5);
+    display: flex; align-items: flex-end; justify-content: center;
+    z-index: 100;
+    padding: 0;
+  }
+  .modal-overlay.hidden { display: none; }
+  .modal {
+    background: white;
+    border-radius: 16px 16px 0 0;
+    padding: 24px 20px 36px;
+    width: 100%;
+    max-width: 480px;
+  }
+  .modal h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 16px;
+  }
+  .modal p { font-size: 0.88rem; color: #555; margin-bottom: 16px; }
+  .reset-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+  .reset-team-btn {
+    padding: 12px;
+    border: 1.5px solid;
+    border-radius: 6px;
+    background: none;
+    cursor: pointer;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.8rem;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    transition: opacity 0.15s;
+  }
+  .reset-team-btn:active { opacity: 0.7; }
+  .reset-pi  { border-color: var(--amber); color: var(--amber-t); background: var(--amber-l); }
+  .reset-tau { border-color: var(--blue);  color: var(--blue-t);  background: var(--blue-l); }
+  .reset-e   { border-color: var(--crim);  color: var(--crim-t);  background: var(--crim-l); }
+  .reset-i   { border-color: var(--emer);  color: var(--emer-t);  background: var(--emer-l); }
+  .modal-cancel {
+    width: 100%; padding: 14px;
+    border: 1.5px solid var(--border); border-radius: 6px;
+    background: none; cursor: pointer;
+    font-family: 'DM Mono', monospace; font-size: 0.82rem;
+    letter-spacing: 0.06em; color: #888;
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="top-bar">
+    <div>
+      <div class="title">Easter Maths Treasure Hunt</div>
+      <div class="subtitle">IB AA HL · Answer Checker</div>
+    </div>
+    <div class="egg">🥚</div>
+  </div>
+
+  <!-- ── TEAM SELECT ── -->
+  <div id="screen-select" class="screen">
+    <div class="welcome-head">Select<br>your team.</div>
+    <div class="welcome-sub">IB Mathematics: Analysis &amp; Approaches HL</div>
+    <div class="welcome-instructions">
+      Go to your first location, solve the question on the card, then type your answer here.
+      Get it right and your next stop is revealed! 🐣
+    </div>
+    <div class="team-grid">
+      <button class="team-btn pi-btn"  onclick="selectTeam('pi')">π<span class="team-label">Team π</span></button>
+      <button class="team-btn tau-btn" onclick="selectTeam('tau')">τ<span class="team-label">Team τ</span></button>
+      <button class="team-btn e-btn"   onclick="selectTeam('e')">e<span class="team-label">Team e</span></button>
+      <button class="team-btn i-btn"   onclick="selectTeam('i')">i<span class="team-label">Team i</span></button>
+    </div>
+    <div class="footer-link" onclick="showResetModal()">⚙ Teacher: reset progress</div>
+  </div>
+
+  <!-- ── HUNT ── -->
+  <div id="screen-hunt" class="screen hidden">
+    <div id="hunt-chip" class="team-chip"></div>
+    <div class="stop-label" id="stop-label"></div>
+    <div class="location-display">
+      <span class="location-icon" id="loc-icon"></span>
+      <span class="location-name" id="loc-name"></span>
+    </div>
+    <div class="divider"></div>
+    <div class="q-prompt-label">Answer this question:</div>
+    <div class="q-prompt" id="q-prompt"></div>
+    <div class="q-hint" id="q-hint"></div>
+    <input
+      id="answer-input"
+      class="answer-input"
+      type="text"
+      inputmode="text"
+      autocomplete="off"
+      autocorrect="off"
+      spellcheck="false"
+      placeholder="Type your answer…"
+      onkeydown="if(event.key==='Enter')submitAnswer()"
+    />
+    <button class="submit-btn" onclick="submitAnswer()">Check Answer →</button>
+    <div class="error-msg" id="error-msg"></div>
+    <div class="progress-area">
+      <div class="progress-label">
+        <span>Progress</span>
+        <span id="progress-text"></span>
+      </div>
+      <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+    </div>
+    <div class="footer-link" onclick="goBack()">← Change team</div>
+  </div>
+
+  <!-- ── REVEAL ── -->
+  <div id="screen-reveal" class="screen reveal-screen hidden">
+    <div class="tick-circle">✓</div>
+    <div class="correct-word">Correct!</div>
+    <div class="next-label">Your next stop is</div>
+    <div class="next-loc-card">
+      <div class="next-loc-icon" id="reveal-icon"></div>
+      <div class="next-loc-name" id="reveal-name"></div>
+      <div class="next-stop-num" id="reveal-stopnum"></div>
+    </div>
+    <button class="goto-btn" onclick="advanceStop()">I'm heading there →</button>
+  </div>
+
+  <!-- ── FINAL ── -->
+  <div id="screen-final" class="screen final-screen hidden">
+    <div class="trophy">🏆</div>
+    <div class="final-title">All done!</div>
+    <div class="final-sub">You've completed all 9 stops.</div>
+    <div class="prize-box">
+      <div class="prize-icon">🍫</div>
+      <div class="prize-text">Head to the Maths Room and show your teacher your completed route to claim your Easter eggs!</div>
+    </div>
+    <div class="footer-link" onclick="goBack()">← Change team</div>
+  </div>
+</div>
+
+<!-- ── TEACHER RESET MODAL ── -->
+<div class="modal-overlay hidden" id="modal-overlay" onclick="hideResetModal(event)">
+  <div class="modal">
+    <h3>⚙ Reset team progress</h3>
+    <p>This will send a team back to their first stop. Use before the hunt starts or if a team needs to restart.</p>
+    <div class="reset-grid">
+      <button class="reset-team-btn reset-pi"  onclick="resetTeam('pi')">Reset π</button>
+      <button class="reset-team-btn reset-tau" onclick="resetTeam('tau')">Reset τ</button>
+      <button class="reset-team-btn reset-e"   onclick="resetTeam('e')">Reset e</button>
+      <button class="reset-team-btn reset-i"   onclick="resetTeam('i')">Reset i</button>
+    </div>
+    <button class="modal-cancel" onclick="hideResetModal()">Cancel</button>
+  </div>
+</div>
+
+<script>
+// ── DATA ─────────────────────────────────────────────────────────────────────
+
+const TEAMS = {
+  pi:  { symbol:'π', name:'Team π', color:'#e8a020', light:'#fff8e7', mid:'#fde68a', dark:'#7a4800',
+         route:['study','canteen','reception','artroom','garden','careers','sciprep','library','maths'] },
+  tau: { symbol:'τ', name:'Team τ', color:'#2563b0', light:'#eff6ff', mid:'#bfdbfe', dark:'#0f2d6e',
+         route:['library','sciprep','careers','garden','artroom','reception','canteen','study','maths'] },
+  e:   { symbol:'e', name:'Team e', color:'#c0392b', light:'#fff1f0', mid:'#fecaca', dark:'#7a1010',
+         route:['reception','artroom','library','canteen','careers','study','sciprep','garden','maths'] },
+  i:   { symbol:'i', name:'Team i', color:'#1a7a4a', light:'#f0fdf4', mid:'#bbf7d0', dark:'#0d4a28',
+         route:['garden','study','artroom','sciprep','library','canteen','reception','careers','maths'] },
+};
+
+const LOCS = {
+  study:    { name:'Where one ponders the beauty of IB in silence',                                icon:'🤫' },
+  canteen:  { name:'Where we steal the kettle from',                                               icon:'☕' },
+  reception:{ name:'The main gate to the realm of IB',                                             icon:'🏛' },
+  artroom:  { name:'Where paints get mixed with treble clefs',                                     icon:'🎨' },
+  garden:   { name:'Where you come to do maths but end up chatting for an hour eating pears',      icon:'🌿' },
+  careers:  { name:'Where your future paths unravel',                                              icon:'🔮' },
+  sciprep:  { name:'Where all chemicals are stored securely',                                      icon:'⚗️' },
+  library:  { name:'The staircase to heaven, built on the dreams and words of the great minds',    icon:'📖' },
+  maths:    { name:'The Fibonacci spiral will lead you home',                                       icon:'🌀', final:true },
+};
+
+const QS = {
+  study: {
+    prompt: 'What is the common difference, d?',
+    hint:   'Enter a whole number (e.g. 6)',
+    check:  [{ value: 4, tol: 0.05 }]
+  },
+  canteen: {
+    prompt: 'What is the smallest positive solution for x?',
+    hint:   'Enter in terms of pi — e.g. pi/3',
+    check:  [{ value: Math.PI/4, tol: 0.02 }]
+  },
+  reception: {
+    prompt: 'What is the constant term in the expansion?',
+    hint:   'Enter as a fraction or decimal — e.g. -7/4',
+    check:  [{ value: -560/27, tol: 0.05 }]
+  },
+  artroom: {
+    prompt: 'What is the exact value of the integral?',
+    hint:   'Enter e.g. ln(3)  or  a decimal',
+    check:  [{ value: Math.log(2), tol: 0.005 }]
+  },
+  garden: {
+    prompt: 'What is the exact area of region R?',
+    hint:   'Enter e.g. pi/3-2',
+    check:  [{ value: Math.PI/2 - 1, tol: 0.005 }]
+  },
+  careers: {
+    prompt: 'What is c in y = mx + c for the normal line at x = 3?',
+    hint:   'Enter as a fraction or decimal — e.g. -7/3',
+    check:  [{ value: -23/2, tol: 0.01 }]
+  },
+  sciprep: {
+    prompt: 'What is the exact volume of revolution?',
+    hint:   'Enter e.g. pi^2/3  or  pi*pi/3',
+    check:  [{ value: Math.PI*Math.PI/4, tol: 0.01 }]
+  },
+  library: {
+    prompt: 'What is the x-coordinate of point T?',
+    hint:   'Enter as a fraction — e.g. 3/5',
+    check:  [{ value: 8/7, tol: 0.005 }]
+  },
+  maths: {
+    prompt: 'What is dV/dt (in cm³ s⁻¹)?',
+    hint:   'Enter e.g. -50*pi  or  -50pi',
+    check:  [{ value: -130*Math.PI, tol: 0.5 }]
+  },
+};
+
+// ── MATH EVALUATOR ───────────────────────────────────────────────────────────
+
+function safeEval(raw) {
+  if (!raw || !raw.trim()) return NaN;
+  let s = raw.trim()
+    .replace(/π/g, '(' + Math.PI + ')')
+    .replace(/\bpi\b/gi, '(' + Math.PI + ')')
+    // Replace standalone 'e' not followed by a digit (Euler's number)
+    .replace(/\be(?!\d)/g, '(' + Math.E + ')')
+    .replace(/log\s*\(/gi, 'Math.log10(')
+    .replace(/ln\s*\(/gi, 'Math.log(')
+    .replace(/sqrt\s*\(/gi, 'Math.sqrt(')
+    .replace(/\^/g, '**')
+    // allow implicit multiply: 2pi → 2*(pi), 3e → 3*(e)
+    .replace(/(\d)\s*\(\s*/g, '$1*(');
+  try {
+    const val = Function('"use strict"; return (' + s + ')')();
+    return typeof val === 'number' && isFinite(val) ? val : NaN;
+  } catch(e) { return NaN; }
+}
+
+function checkAnswer(input, locKey) {
+  const val = safeEval(input);
+  if (isNaN(val)) return false;
+  return QS[locKey].check.some(c => Math.abs(val - c.value) <= c.tol);
+}
+
+// ── STATE ────────────────────────────────────────────────────────────────────
+
+let state = { team: null, stopIndex: 0 };
+
+function loadTeamState(teamKey) {
+  try {
+    const raw = localStorage.getItem('hunt_' + teamKey);
+    return raw ? JSON.parse(raw) : { stopIndex: 0 };
+  } catch(e) { return { stopIndex: 0 }; }
+}
+
+function saveTeamState(teamKey, stopIndex) {
+  try { localStorage.setItem('hunt_' + teamKey, JSON.stringify({ stopIndex })); } catch(e) {}
+}
+
+// ── SCREENS ──────────────────────────────────────────────────────────────────
+
+function show(id) {
+  ['screen-select','screen-hunt','screen-reveal','screen-final'].forEach(s => {
+    document.getElementById(s).classList.toggle('hidden', s !== id);
+  });
+}
+
+function selectTeam(teamKey) {
+  const saved = loadTeamState(teamKey);
+  state.team = teamKey;
+  state.stopIndex = saved.stopIndex || 0;
+  applyTeamTheme(teamKey);
+  showHuntScreen();
+}
+
+function applyTeamTheme(teamKey) {
+  const t = TEAMS[teamKey];
+  document.documentElement.style.setProperty('--team-color', t.color);
+  document.documentElement.style.setProperty('--team-light', t.light);
+  document.documentElement.style.setProperty('--team-mid',   t.mid);
+  document.documentElement.style.setProperty('--team-dark',  t.dark);
+}
+
+function showHuntScreen() {
+  const team = TEAMS[state.team];
+  const route = team.route;
+  const idx   = state.stopIndex;
+  const locKey = route[idx];
+  const loc    = LOCS[locKey];
+  const q      = QS[locKey];
+  const total  = route.length;
+
+  // Check if already completed
+  if (idx >= total) { show('screen-final'); return; }
+
+  // Team chip
+  const chip = document.getElementById('hunt-chip');
+  chip.innerHTML = `<span class="chip-symbol">${team.symbol}</span>${team.name}`;
+  chip.style.borderColor = team.color;
+  chip.style.background  = team.light;
+  chip.style.color       = team.dark;
+
+  document.getElementById('stop-label').textContent  = `Stop ${idx + 1} of ${total}`;
+  document.getElementById('loc-icon').textContent    = loc.icon;
+  document.getElementById('loc-name').textContent    = loc.name;
+  document.getElementById('q-prompt').textContent    = q.prompt;
+  document.getElementById('q-hint').textContent      = q.hint;
+
+  // Progress
+  const pct = (idx / total * 100).toFixed(0);
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-text').textContent  = `${idx}/${total} complete`;
+
+  // Clear input and error
+  document.getElementById('answer-input').value = '';
+  document.getElementById('answer-input').className = 'answer-input';
+  document.getElementById('error-msg').textContent = '';
+
+  // Style submit button with team colour
+  const btn = document.querySelector('.submit-btn');
+  btn.style.background = team.color;
+  btn.style.color      = 'white';
+
+  show('screen-hunt');
+  setTimeout(() => document.getElementById('answer-input').focus(), 100);
+}
+
+function submitAnswer() {
+  const input = document.getElementById('answer-input');
+  const val   = input.value.trim();
+  const locKey = TEAMS[state.team].route[state.stopIndex];
+
+  if (!val) {
+    showError('Please enter your answer first!');
+    return;
+  }
+
+  if (safeEval(val) === NaN && isNaN(parseFloat(val))) {
+    showError("Hmm, I can't read that. Try e.g. pi/4 or 0.785");
+    shakeInput();
+    return;
+  }
+
+  if (checkAnswer(val, locKey)) {
+    // Correct!
+    input.classList.add('correct-glow');
+    document.getElementById('error-msg').textContent = '';
+    setTimeout(() => showReveal(), 300);
+  } else {
+    showError('Not quite — double-check your working and try again!');
+    shakeInput();
+  }
+}
+
+function showError(msg) {
+  document.getElementById('error-msg').textContent = msg;
+}
+
+function shakeInput() {
+  const el = document.getElementById('answer-input');
+  el.classList.remove('shake');
+  void el.offsetWidth; // reflow to restart animation
+  el.classList.add('shake');
+  setTimeout(() => el.classList.remove('shake'), 400);
+}
+
+function showReveal() {
+  const team   = TEAMS[state.team];
+  const route  = team.route;
+  const nextIdx = state.stopIndex + 1;
+  const total   = route.length;
+
+  if (nextIdx >= total) {
+    // Final stop answered correctly
+    state.stopIndex = total;
+    saveTeamState(state.team, total);
+    show('screen-final');
+    return;
+  }
+
+  const nextLocKey = route[nextIdx];
+  const nextLoc    = LOCS[nextLocKey];
+
+  document.getElementById('reveal-icon').textContent    = nextLoc.icon;
+  document.getElementById('reveal-name').textContent    = nextLoc.name;
+  document.getElementById('reveal-stopnum').textContent = `Stop ${nextIdx + 1} of ${total}`;
+
+  const card = document.querySelector('.next-loc-card');
+  card.style.borderColor = team.color;
+  card.style.background  = team.light;
+  card.style.color       = team.dark;
+
+  const gBtn = document.querySelector('.goto-btn');
+  gBtn.style.background = team.color;
+
+  show('screen-reveal');
+}
+
+function advanceStop() {
+  state.stopIndex += 1;
+  saveTeamState(state.team, state.stopIndex);
+  showHuntScreen();
+}
+
+function goBack() {
+  state.team = null;
+  document.documentElement.style.removeProperty('--team-color');
+  document.documentElement.style.removeProperty('--team-light');
+  document.documentElement.style.removeProperty('--team-mid');
+  document.documentElement.style.removeProperty('--team-dark');
+  show('screen-select');
+}
+
+// ── TEACHER RESET ─────────────────────────────────────────────────────────
+
+function showResetModal() {
+  document.getElementById('modal-overlay').classList.remove('hidden');
+}
+function hideResetModal(e) {
+  if (!e || e.target === document.getElementById('modal-overlay')) {
+    document.getElementById('modal-overlay').classList.add('hidden');
+  }
+}
+function resetTeam(teamKey) {
+  saveTeamState(teamKey, 0);
+  hideResetModal();
+  // Show confirmation briefly
+  const teams = {pi:'π', tau:'τ', e:'e', i:'i'};
+  alert(`Team ${teams[teamKey]} has been reset to Stop 1.`);
+}
+</script>
+</body>
+</html>
